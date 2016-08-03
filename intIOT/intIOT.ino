@@ -4,7 +4,7 @@
 #define poten	A0
 #define boton	2
 
-const unsigned long tiempoPot = 10L * 200L;
+const unsigned long tiempoPot = 10L * 500L;
 
 boolean estBoton;
 int estPot;
@@ -22,13 +22,15 @@ void loop() {
 	estBoton = digitalRead(boton);
 	
 	if(estBoton){
-		//delay(150);
-		Serial.println("Persona ingresando.");
+		delay(150);
 		contPersonas++;
+		Serial.println("Personas: " + String(contPersonas));
 	}
 
 	if(millis() - ultimaConexionPot > tiempoPot){
 		estPot = analogRead(poten);
-		estPot = map(estPot, 0, 1023, 0, 100);    
+		estPot = map(estPot, 0, 1023, 0, 100);
+		Serial.println("Lectura actual: " + String(estPot));
+		ultimaConexionPot = millis();
 	}
 }
