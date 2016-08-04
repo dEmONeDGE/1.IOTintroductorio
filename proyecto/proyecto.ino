@@ -7,6 +7,11 @@
 #include <SPI.h>
 
 #define nombreCosa "iotUMSS"
+#define poten	A0
+#define boton	2
+
+const unsigned long tiempoPot = 10L * 500L;
+unsigned long ultimaConexionPot = 0;
 
 byte mac[] = {0XAA, 0XBB, 0XCC, 0XDD, 0XEE, 0XFF};
 IPAddress ip(192, 168, 1, 110);
@@ -14,23 +19,36 @@ IPAddress serverDns(8, 8, 8, 8);
 IPAddress gateway(192, 168, 1, 1);
 EthernetClient miCliente;
 
-int val1 = 0, val2 = 0;
-
 char miServidor[] = "www.dweet.io";
-	
+boolean estBoton;
+int estPot = 0;
+int contPersonas = 0;
+
 void setup() {
 	Serial.begin(9600);
+	pinMode(boton, INPUT);
 	Ethernet.begin(mac, ip, serverDns, gateway);
 	delay(1000);
-
-	randomSeed(A0);
 }
 
 void loop() {
-	val1 = random(1, 100);
-	val2 = random(1, 100);
-	httpPeticion(val1, val2);
-	delay(5000);
+
+	estBoton = digitalRead(boton);
+	
+	if(estBoton){
+		delay(150);
+		contPersonas++;
+		httpPeticion(contPersonas, estPot);
+		Serial.println("Personas: " + String(contPersonas));
+	}
+
+	if(millis() - ultimaConexionPot > tiempoPot){
+		estPot = analogRead(poten);
+		estPot = map(estPot, 0, 1023, 0, 100);
+		Serial.println("Lectura actual: " + String(estPot));
+		httpPeticion(contPersonas, estPot);
+		ultimaConexionPot = millis();
+	}
 }
 
 void httpPeticion(int val1, int val2){
